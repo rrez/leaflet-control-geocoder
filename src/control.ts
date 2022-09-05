@@ -3,6 +3,7 @@ import { Nominatim } from './geocoders/index';
 import { IGeocoder, GeocodingResult } from './geocoders/api';
 
 export interface GeocoderControlOptions extends L.ControlOptions {
+  closeButton: boolean;
   /**
    * Collapse control unless hovered/clicked
    */
@@ -115,6 +116,7 @@ export class GeocoderControl extends EventedControl {
   options: GeocoderControlOptions = {
     showUniqueResult: true,
     showResultIcons: false,
+    closeButton: false,
     collapsed: true,
     expand: 'touch',
     position: 'topright',
@@ -190,6 +192,17 @@ export class GeocoderControl extends EventedControl {
     input.placeholder = this.options.placeholder;
     L.DomEvent.disableClickPropagation(input);
 
+    const closeBtn = L.DomUtil.create(
+      'button',
+      className + '-icon closebtn',
+      form
+    ) as HTMLButtonElement;
+
+    closeBtn.innerHTML = '&nbsp;';
+    closeBtn.type = 'button';
+    closeBtn.setAttribute('aria-label', this.options.iconLabel);
+    L.DomEvent.addListener(closeBtn, 'click', this._onCloseBtn, this);
+
     this._errorElement = L.DomUtil.create(
       'div',
       className + '-form-no-error',
@@ -259,6 +272,10 @@ export class GeocoderControl extends EventedControl {
     L.DomEvent.disableClickPropagation(container);
 
     return container;
+  }
+
+  _onCloseBtn(e: PointerEvent) {
+    this._closeSearch();
   }
 
   /**
@@ -357,6 +374,11 @@ export class GeocoderControl extends EventedControl {
   }
 
   private _collapse() {
+    if (this.options.closeButton) return;
+    this._closeSearch();
+  }
+
+  private _closeSearch() {
     L.DomUtil.removeClass(this._container, 'leaflet-control-geocoder-expanded');
     L.DomUtil.addClass(this._alts, 'leaflet-control-geocoder-alternatives-minimized');
     L.DomUtil.removeClass(this._errorElement, 'leaflet-control-geocoder-error');
