@@ -3,7 +3,14 @@ import { Nominatim } from './geocoders/index';
 import { IGeocoder, GeocodingResult } from './geocoders/api';
 
 export interface GeocoderControlOptions extends L.ControlOptions {
+  /**
+   * Adds an button to close the Search.
+   */
   closeButton: boolean;
+
+  tooltipCloseButton: string;
+
+  tooltipSearchButton: string;
   /**
    * Collapse control unless hovered/clicked
    */
@@ -121,6 +128,8 @@ export class GeocoderControl extends EventedControl {
     expand: 'touch',
     position: 'topright',
     placeholder: 'Search...',
+    tooltipCloseButton: 'Close Search',
+    tooltipSearchButton: 'Search',
     errorMessage: 'Nothing found.',
     iconLabel: 'Initiate a new search',
     query: '',
@@ -185,13 +194,13 @@ export class GeocoderControl extends EventedControl {
     icon.innerHTML = '&nbsp;';
     icon.type = 'button';
     icon.setAttribute('aria-label', this.options.iconLabel);
+    icon.setAttribute('title', this.options.tooltipSearchButton);
 
     const input = (this._input = L.DomUtil.create('input', '', form) as HTMLInputElement);
     input.type = 'text';
     input.value = this.options.query;
     input.placeholder = this.options.placeholder;
     L.DomEvent.disableClickPropagation(input);
-
     const closeBtn = L.DomUtil.create(
       'button',
       className + '-icon closebtn',
@@ -201,6 +210,8 @@ export class GeocoderControl extends EventedControl {
     closeBtn.innerHTML = '&nbsp;';
     closeBtn.type = 'button';
     closeBtn.setAttribute('aria-label', this.options.iconLabel);
+    closeBtn.setAttribute('title', this.options.tooltipCloseButton);
+
     L.DomEvent.addListener(closeBtn, 'click', this._onCloseBtn, this);
 
     this._errorElement = L.DomUtil.create(
